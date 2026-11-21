@@ -232,6 +232,7 @@ public class MainActivity extends Activity implements UvcCamera.Listener {
             connection = null;
         }
         if (controlsList != null) controlsList.removeAllViews();
+        if (sizeButton != null) sizeButton.setText("(no camera)");
     }
 
     private void applySize(String s) {
@@ -421,6 +422,7 @@ public class MainActivity extends Activity implements UvcCamera.Listener {
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setPadding(24, 24, 24, 24);
         sizeButton = new Button(this);
+        sizeButton.setText("(no camera)");
         sizeButton.setOnClickListener(v -> cycleSize());
         panel.addView(label("Resolution"));
         panel.addView(sizeButton);
