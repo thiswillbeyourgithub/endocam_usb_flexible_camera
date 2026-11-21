@@ -1,0 +1,50 @@
+// Plain Java + NDK app, no AndroidX/Kotlin, to keep the APK tiny and the
+// build dependency-free apart from the Android Gradle Plugin itself.
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "org.endocam"
+    compileSdk 35
+    ndkVersion "27.2.12479018"
+
+    defaultConfig {
+        applicationId "org.endocam"
+        // 29 (Android 10) so photos/videos can go to MediaStore without any
+        // storage permission.
+        minSdk 29
+        targetSdk 35
+        versionCode 1
+        versionName "0.1.0"
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=none"
+            }
+        }
+        ndk {
+            abiFilters "arm64-v8a", "armeabi-v7a", "x86_64"
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Signed with the debug key so the release APK installs directly
+            // without a keystore setup. Fine for a sideloaded PoC.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

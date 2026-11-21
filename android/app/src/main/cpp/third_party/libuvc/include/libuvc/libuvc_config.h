@@ -1,0 +1,16 @@
+/* Hand-written replacement for the CMake-generated libuvc_config.h.
+ * Version matches the vendored libuvc (see ../../VERSIONS.txt). JPEG support
+ * is deliberately disabled: the target endoscope only streams YUYV, and this
+ * avoids pulling libjpeg into the Android build. */
+#ifndef LIBUVC_CONFIG_H
+#define LIBUVC_CONFIG_H
+
+#define LIBUVC_VERSION_MAJOR 0
+#define LIBUVC_VERSION_MINOR 0
+#define LIBUVC_VERSION_PATCH 9
+#define LIBUVC_VERSION_STR "0.0.9"
+#define LIBUVC_VERSION_INT ((0 << 16) | (0 << 8) | (9))
+#define LIBUVC_VERSION_GTE(major, minor, patch) \
+  (LIBUVC_VERSION_INT >= (((major) << 16) | ((minor) << 8) | (patch)))
+
+#endif

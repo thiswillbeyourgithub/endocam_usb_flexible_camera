@@ -1,0 +1,2 @@
+libusb: https://github.com/libusb/libusb tag v1.0.27
+libuvc: https://github.com/libuvc/libuvc commit 7955bb1b28c95209d980d481ab02fd66a2234195
