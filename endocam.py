@@ -102,7 +102,7 @@ def _usb_device_dir(path: Path) -> Path | None:
     return None
 
 
-def find_camera(vid: str = DEFAULT_VID, pid: str = DEFAULT_PID) -> CameraPaths:
+def find_camera(vid: str = DEFAULT_VID, pid: str = DEFAULT_PID, sysfs: Path = Path("/sys")) -> CameraPaths:
     """Locate the video and button nodes of the camera via sysfs.
 
     A UVC camera exposes several video nodes (one capture node and one
@@ -113,6 +113,8 @@ def find_camera(vid: str = DEFAULT_VID, pid: str = DEFAULT_PID) -> CameraPaths:
     ----------
     vid, pid : str
         USB vendor and product id in lowercase hex.
+    sysfs : Path
+        Root of sysfs. Only overridden by tests, which build a fake tree.
 
     Returns
     -------
@@ -125,7 +127,7 @@ def find_camera(vid: str = DEFAULT_VID, pid: str = DEFAULT_PID) -> CameraPaths:
         If no matching video node exists.
     """
     candidates: list[tuple[int, str, Path]] = []
-    for node in sorted(Path("/sys/class/video4linux").glob("video*")):
+    for node in sorted((sysfs / "class/video4linux").glob("video*")):
         usb = _usb_device_dir(node.resolve())
         if usb is None:
             continue
@@ -138,7 +140,7 @@ def find_camera(vid: str = DEFAULT_VID, pid: str = DEFAULT_PID) -> CameraPaths:
     _, video, usb = min(candidates)
 
     button = None
-    for ev in sorted(Path("/sys/class/input").glob("event*")):
+    for ev in sorted((sysfs / "class/input").glob("event*")):
         if _usb_device_dir(ev.resolve()) == usb:
             button = f"/dev/input/{ev.name}"
             break
@@ -265,6 +267,7 @@ class Recorder:
         self.path: Path | None = None
         self.t0 = 0.0
         self.written = 0
+        self.last: np.ndarray | None = None
 
     @property
     def active(self) -> bool:
@@ -275,19 +278,32 @@ class Recorder:
         self.writer = cv2.VideoWriter(str(self.path), cv2.VideoWriter_fourcc(*"mp4v"), self.fps, frame_size)
         self.t0 = time.monotonic()
         self.written = 0
+        self.last = None
         logger.info(f"Recording to {self.path}")
 
     def write(self, frame: np.ndarray) -> None:
         if self.writer is None:
             return
-        # At least one copy so the very first frame is never skipped.
-        target = max(int((time.monotonic() - self.t0) * self.fps) + 1, self.written + 1)
+        self.last = frame
+        # Frame i covers [i/fps, (i+1)/fps); the frame arriving at `elapsed`
+        # must fill every slot up to and including the current one. The 1e-6
+        # absorbs float error (0.9 * 30 = 26.999999 would lose a slot). At
+        # least one copy is written so no captured frame is ever skipped.
+        elapsed = time.monotonic() - self.t0
+        self._pad(max(int(elapsed * self.fps + 1e-6) + 1, self.written + 1))
+
+    def _pad(self, target: int) -> None:
+        """Write ``self.last`` until ``target`` frames have been written."""
         while self.written < target:
-            self.writer.write(frame)
+            self.writer.write(self.last)
             self.written += 1
 
     def stop(self) -> None:
         if self.writer is not None:
+            # Hold the last frame until the stop time, so the file lasts
+            # exactly as long as the recording did.
+            if self.last is not None:
+                self._pad(round((time.monotonic() - self.t0) * self.fps))
             self.writer.release()
             logger.info(f"Saved video {self.path}")
         self.writer = None
