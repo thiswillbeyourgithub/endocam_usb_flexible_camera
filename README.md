@@ -68,7 +68,7 @@ Requires Android 10 (API 29) or newer and a phone with USB host (OTG) support, w
 
 ### Install
 
-Build it (see below) and install `android/app/build/outputs/apk/release/app-release.apk`, either with `adb install app-release.apk` or by copying the file to the phone and opening it (allow "install unknown apps" for your file manager). The release APK is signed with the Android debug key so it can be sideloaded directly.
+Download the APK from the [releases page](https://github.com/thiswillbeyourgithub/endocam_usb_flexible_camera/releases), or build it (see below) and install `android/app/build/outputs/apk/release/app-release.apk`, either with `adb install app-release.apk` or by copying the file to the phone and opening it (allow "install unknown apps" for your file manager). The release APK is signed with the Android debug key so it can be sideloaded directly.
 
 Plug in the camera, allow the camera permission, then accept the USB permission prompt (tick "always open" to skip it next time), and the image should appear.
 
