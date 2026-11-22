@@ -104,4 +104,4 @@ This is a proof of concept. The Python tool was tested with the real camera (inf
 
 TODO: choose a license. Note that the vendored libusb is LGPL-2.1 (statically linked into the app, which the full source distribution here satisfies) and libuvc is BSD-3-Clause, see `android/app/src/main/cpp/third_party/`.
 
-Repository URL: TODO
+Repository: https://github.com/thiswillbeyourgithub/endocam_usb_flexible_camera

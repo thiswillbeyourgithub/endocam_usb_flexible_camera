@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+.pytest_cache/
+captures/
+
+# Android build outputs and machine-specific SDK path
+android/.gradle/
+android/app/.cxx/
+android/app/build/
+android/build/
+android/local.properties
