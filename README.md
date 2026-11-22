@@ -70,7 +70,9 @@ Requires Android 10 (API 29) or newer and a phone with USB host (OTG) support, w
 
 Build it (see below) and install `android/app/build/outputs/apk/release/app-release.apk`, either with `adb install app-release.apk` or by copying the file to the phone and opening it (allow "install unknown apps" for your file manager). The release APK is signed with the Android debug key so it can be sideloaded directly.
 
-Plug in the camera, accept the USB permission prompt (tick "always open" to skip it next time), and the image should appear.
+Plug in the camera, allow the camera permission, then accept the USB permission prompt (tick "always open" to skip it next time), and the image should appear.
+
+The camera permission is not used to access the phone's own cameras: since Android 9, the system refuses USB access to any USB video device unless the app holds it. If it was denied, the USB request silently fails, re-enable it in Settings > Apps > Endocam > Permissions.
 
 ### Build
 

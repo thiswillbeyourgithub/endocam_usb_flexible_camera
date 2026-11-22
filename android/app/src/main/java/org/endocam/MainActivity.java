@@ -1,5 +1,6 @@
 package org.endocam;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -9,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -62,6 +64,7 @@ public class MainActivity extends Activity implements UvcCamera.Listener {
     /** GEMBIRD / AppoTech AX2311 endoscope. Any other UVC camera also works. */
     private static final int VID = 0x1908, PID = 0x2311;
     private static final int USB_CLASS_VIDEO = 14;
+    private static final int REQ_CAMERA = 1;
 
     private final Handler ui = new Handler(Looper.getMainLooper());
     /** Photo encoding and MediaStore I/O stay off the UI and frame threads. */
@@ -166,6 +169,16 @@ public class MainActivity extends Activity implements UvcCamera.Listener {
             setStatus("Plug in the USB camera (USB-C or OTG adapter)");
             return;
         }
+        // Since Android 9, UsbManager refuses USB permission for any device
+        // with a video interface (UVC cameras) unless the app holds the
+        // CAMERA runtime permission: requestPermission then reports
+        // "not granted" without even showing a dialog. So CAMERA first;
+        // onRequestPermissionsResult calls handleIntent again.
+        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            setStatus("Camera permission needed to access the USB camera");
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQ_CAMERA);
+            return;
+        }
         if (usb.hasPermission(dev)) {
             openCamera(dev);
         } else {
@@ -174,6 +187,17 @@ public class MainActivity extends Activity implements UvcCamera.Listener {
             Intent i = new Intent(ACTION_USB_PERMISSION).setPackage(getPackageName());
             PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, PendingIntent.FLAG_MUTABLE);
             usb.requestPermission(dev, pi);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        if (requestCode != REQ_CAMERA) return;
+        if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+            handleIntent(null);
+        } else {
+            setStatus("Camera permission denied: Android requires it for USB cameras.\n"
+                    + "Grant it in Settings > Apps > Endocam > Permissions.");
         }
     }
 
@@ -206,7 +230,7 @@ public class MainActivity extends Activity implements UvcCamera.Listener {
         camera = new UvcCamera(this);
         int r = camera.open(connection.getFileDescriptor());
         if (r != 0) {
-            setStatus("libuvc open failed (" + r + ")");
+            setStatus("Camera open failed: " + UvcCamera.errorName(r));
             camera = null;
             connection.close();
             connection = null;
@@ -247,7 +271,7 @@ public class MainActivity extends Activity implements UvcCamera.Listener {
     private void startStream() {
         if (camera == null) return;
         int r = camera.start(width, height, 30);
-        if (r != 0) setStatus("Stream start failed (" + r + ")");
+        if (r != 0) setStatus("Stream start failed: " + UvcCamera.errorName(r));
         attachSurface();
         updateTransform();
     }

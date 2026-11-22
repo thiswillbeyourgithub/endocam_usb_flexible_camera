@@ -70,6 +70,10 @@ public class UvcCamera {
     public int getControl(int id, int req) { return nativeGetControl(id, req); }
     public int setControl(int id, int value) { return nativeSetControl(id, value); }
 
+    /** Human readable libuvc/libusb error, e.g. -3 gives "Access denied (-3)". */
+    public static String errorName(int code) { return nativeErrorName(code) + " (" + code + ")"; }
+
+    private static native String nativeErrorName(int code);
     private native int nativeOpen(int fd);
     private native int nativeStart(int width, int height, int fps);
     private native void nativeStop();

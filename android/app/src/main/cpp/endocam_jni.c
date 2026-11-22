@@ -155,6 +155,12 @@ static void button_cb(int button, int state, void *user) {
 
 #define JNI(ret, name) JNIEXPORT ret JNICALL Java_org_endocam_UvcCamera_##name
 
+/* libuvc error codes equal libusb's, so uvc_strerror covers both. */
+JNIEXPORT jstring JNICALL Java_org_endocam_UvcCamera_nativeErrorName(JNIEnv *env, jclass cls, jint code) {
+    (void)cls;
+    return (*env)->NewStringUTF(env, uvc_strerror((uvc_error_t)code));
+}
+
 /* Returns 0 on success, or a negative libuvc/libusb error code. */
 JNI(jint, nativeOpen)(JNIEnv *env, jobject thiz, jint fd) {
     if (g.devh) return 0;

@@ -5,6 +5,13 @@
          a message if no USB host support / camera is present. -->
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
 
+    <!-- Android 9+ only grants USB access to video class devices (UVC
+         cameras) to apps holding CAMERA. The app never uses the phone's own
+         cameras. required="false" keeps the APK installable on devices
+         without a built-in camera. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <application
         android:label="Endocam"
         android:icon="@drawable/ic_launcher"
