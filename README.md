@@ -2,6 +2,8 @@
 
 Tools for cheap USB endoscope cameras (the "camera at the end of a flexible tube" kind), developed against a GEMBIRD unit based on the AppoTech AX2311 chip (`lsusb`: `1908:2311 GEMBIRD Generic UVC 1.00 camera`).
 
+It is the common cheap endoscope design (sold under brands such as Teslong): a semi-rigid cable several meters long with a small camera head and ring of LEDs at the tip, an inline control box near the plug carrying the snapshot button and the LED brightness wheel, and a 3-in-1 plug (USB-A with micro-USB and USB-C adapters) so it connects to both computers and phones.
+
 The camera is a standard UVC device, so this should also work with most other USB endoscopes and webcams.
 
 It contains two independent pieces:
@@ -102,6 +104,8 @@ This is a proof of concept. The Python tool was tested with the real camera (inf
 
 ## License
 
-TODO: choose a license. Note that the vendored libusb is LGPL-2.1 (statically linked into the app, which the full source distribution here satisfies) and libuvc is BSD-3-Clause, see `android/app/src/main/cpp/third_party/`.
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+
+The vendored third-party libraries keep their own licenses: libusb is LGPL-2.1 and libuvc is BSD-3-Clause, both compatible with the AGPLv3. See `android/app/src/main/cpp/third_party/`.
 
 Repository: https://github.com/thiswillbeyourgithub/endocam_usb_flexible_camera
